@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Break Bricks</title>
+  <style>
+    #game {
+      float: left;
+      border-right: 1px solid black;
+    }
+
+    #setting {
+      width: 15%;
+      float: left;
+      padding: 10px;
+    }
+
+    #ball {
+      width: 15px;
+      height: 15px;
+      background: #0db2ff;
+      border-radius: 50%;
+      position: absolute;
+    }
+
+    #controlWall {
+      width: 140px;
+      height: 3%;
+      z-index: 999;
+      background-color: purple;
+      border-radius: 10px;
+      position: absolute;
+    }
+
+    #brick {
+      width: 100%;
+      height: 500px;
+      position: relative;
+      left: 0;
+      right: 0;
+    }
+
+    #brick div {
+      width: 45px;
+      height: 15px;
+      border: 1px solid #ff645b;
+      position: absolute;
+      background: rgb(255, 99, 89);
+      box-shadow: 0 0 9px 1px rgb(255, 187, 136) inset;
+      top: 0;
+      left: 0;
+    }
+
+    #gameover {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      margin: auto;
+      width: 300px;
+      height: 200px;
+      box-shadow: 0 0 4px #0a1c57;
+      background-color: #ecf0f583;
+      display: none;
+    }
+
+    #gameover p {
+      width: 100%;
+      height: 40px;
+      text-align: center;
+      font-size: 30px;
+      color: #4d88f5;
+      margin-top: 50px;
+    }
+
+    #gameover span {
+      width: 60%;
+      height: 40px;
+      display: block;
+      margin: 38px auto 0;
+      text-align: center;
+      font-size: 20px;
+      background: #4d88f5;
+      color: #ffffff;
+      border-radius: 10px;
+      line-height: 40px;
+    }
+  </style>
+
+  <script>
+    let gameWidth = window.innerWidth * 0.75
+    let totalScore = 0
+    window.onload = function () {
+      let game = document.getElementById('game')
+      let ball = document.getElementById("ball")
+      let controlWall = document.getElementById("controlWall")
+      let brick = document.getElementById("brick")
+      let allBricks = brick.getElementsByTagName("div")
+      let score = document.getElementById("score")
+
+      game.style.width = gameWidth + 'px'
+      game.style.height = window.innerHeight - 50 + 'px'
+
+      dragWall(controlWall)
+      createBrick(gameWidth / 90)
+      gameInit()
+
+      // speed of ball move horizontal
+      let speedX = 8
+      // vertical
+      let speedY = -8
+
+
+      //Initialize the game
+      function gameInit () {
+        ball.style.top = innerHeight - 150 + 'px'
+        ball.style.left = gameWidth / 2 + 'px'
+        document.onclick = function () {
+          document.onclick = null
+          setInterval(function () {
+            // left and top in css used to control the position of ball 
+            // next position of ball(x,y) = (current x + speedX)px , (current y +speedY)px
+            ball.style.left = ball.offsetLeft + speedX + 'px'
+            ball.style.top = ball.offsetTop + speedY + 'px'
+
+
+            // if ball hit the wall , go opposite direction
+            if (ball.offsetLeft >= gameWidth - ball.offsetWidth - 10 || ball.offsetLeft <= 0) {
+              speedX *= -1
+            }
+            if (ball.offsetTop <= 0) {
+              speedY *= -1
+            }
+
+            //hit the button of window
+            if (ball.offsetTop >= window.innerHeight - ball.offsetHeight - 10) {
+              endGame()
+            }
+
+
+            // check if controlWall hit the ball
+            if (hit(ball, controlWall)) {
+              speedY *= -1
+            }
+
+            // check if ball hit a brick
+            for (let i = 0; i < allBricks.length; i++) {
+              if (hit(ball, allBricks[i])) {
+                speedY *= -1
+                //remove current brick
+                brick.removeChild(allBricks[i])
+                if (allBricks.length === 0) {
+                  endGame()
+                }
+                scoreChange()
+                break
+              }
+            }
+          }, 30)
+
+        }
+      }
+    }
+
+    //control wall to move
+    function dragWall (obj) {
+      //initalized controlWall
+      controlWall.style.top = window.innerHeight - 135 + 'px'
+      controlWall.style.left = gameWidth / 2 - 70 + 'px'
+      // store the position of current mouse
+      obj.onmousedown = function (ev) {
+        let e = ev || window.event
+        let offsetX = e.clientX - obj.offsetLeft //e.clientX is the current x coordinate of mouse
+
+        //when mouse move, move the controlWall
+        document.onmousemove = function (ev) {
+          let e = ev || window.event
+          let l = e.clientX - offsetX
+
+          if (l < 0) {
+            l = 0
+          }
+          if (e.clientX > gameWidth - controlWall.offsetWidth) {
+            l = gameWidth - controlWall.offsetWidth
+          }
+
+          obj.style.left = l + 'px'
+        }
+      }
+      document.onmouseup = function () {
+        document.onmousemove = null
+      }
+    }
+
+    //create brick
+    // n: number of brick
+    function createBrick (n) {
+
+
+      let w = 45 * 2, //set width between each brick
+        h = 15 * 2 //set height between each brick
+
+      for (let i = 1; i <= n; i++) {  //create n layer of brick
+        for (let j = 1; j < n - 1; j++) {    //number of brick in each layer
+          let obj = document.createElement("div")
+          obj.style.top = i * h + 'px'
+          obj.style.left = (j * w) + 'px'
+          brick.appendChild(obj)
+        }
+      }
+
+    }
+
+    //check if two object hit eachother
+    function hit (obj1, obj2) {
+      let left1 = obj1.offsetLeft
+      let right1 = obj1.offsetLeft + obj1.offsetWidth
+      let top1 = obj1.offsetTop
+      let button1 = obj1.offsetTop + obj1.offsetHeight
+
+      let left2 = obj2.offsetLeft
+      let right2 = obj2.offsetLeft + obj2.offsetWidth
+      let top2 = obj2.offsetTop
+      let button2 = obj2.offsetTop + obj2.offsetHeight
+
+
+      // in case two object will not hit
+      if (left2 > right1 || right2 < left1 || top2 > button1 || button2 < top1) {
+        return false
+      }
+      else {
+        return true
+      }
+
+    }
+
+    //change score
+    function scoreChange () {
+      totalScore++
+      score.innerHTML = 'SCORE: ' + totalScore + ' POINTS'
+    }
+
+    //end of game
+    function endGame () {
+      let end = document.querySelector('#gameover')
+
+      //display total score
+      end.style.display = 'block'
+      end.children[0].innerHTML = 'TOTAL: ' + totalScore + ' POINTS' //end.children[0] => <p></p>
+
+      controlWall.style.display = 'none'
+      ball.style.display = 'none'
+
+      // reload window
+      end.children[1].onclick = function () {  // end.children[1] => <span></span>
+        window.location.reload()
+      }
+
+    }
+
+  </script>
+</head>
+
+<body>
+  <div id="game">
+    <div id="ball"></div>
+    <div id="controlWall"></div>
+    <div id="brick"> </div>
+  </div>
+  <div id="setting">
+    <div id="score">SCORE : 0 POINTS </div>
+    <div id="gameover">
+      <p>Total: 30 points</p>
+      <span>Ok</span>
+    </div>
+  </div>
+
+
+</body>
+
+</html>
