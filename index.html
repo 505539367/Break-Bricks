@@ -30,7 +30,7 @@
       width: 140px;
       height: 3%;
       z-index: 999;
-      background-color: purple;
+      background-color: rgb(72, 122, 5);
       border-radius: 10px;
       position: absolute;
     }
@@ -46,10 +46,10 @@
     #brick div {
       width: 45px;
       height: 15px;
-      border: 1px solid #ff5bd6f8;
+      border: 1px solid #f3cc98f8;
       position: absolute;
-      background: rgba(250, 125, 184, 0.795);
-      box-shadow: 0 0 9px 1px rgb(235, 146, 208) inset;
+      background: rgba(248, 158, 85, 0.795);
+      box-shadow: 0 0 9px 1px rgba(245, 92, 3, 0.932) inset;
       top: 0;
       left: 0;
     }
@@ -95,16 +95,29 @@
     let gameWidth = window.innerWidth * 0.75
     let totalScore = 0
     window.onload = function () {
+      //game portion
       let game = document.getElementById('game')
       let ball = document.getElementById("ball")
       let controlWall = document.getElementById("controlWall")
       let brick = document.getElementById("brick")
       let allBricks = brick.getElementsByTagName("div")
       let score = document.getElementById("score")
+
+      // setting portion
+      let note = document.getElementById('note')
       let inputSpeed = document.getElementById("speed")
-      console.log(localStorage.getItem("input-speed"))
-      inputSpeed.value = localStorage.getItem("input-speed")
+      // in case when user first time playing this game, there is nothing in localstorage
+      if (localStorage.getItem("input-speed") !== null) {
+        inputSpeed.value = localStorage.getItem("input-speed")
+      }
       let speed = parseInt(inputSpeed.value)
+
+      let inputLayer = document.getElementById("layer")
+      // in case when user first time playing this game, there is nothing in localstorage
+      if (localStorage.getItem("input-layer") !== null) {
+        inputLayer.value = localStorage.getItem("input-layer")
+      }
+      let layerNumber = parseInt(inputLayer.value)
 
       //when user change speed of ball move, reload window
       inputSpeed.addEventListener('change', function handleChange (event) {
@@ -114,26 +127,39 @@
         window.location.reload()
       })
 
-      game.style.width = gameWidth + 'px'
-      game.style.height = window.innerHeight - 50 + 'px'
+      //when user change layer of brick, reload window
+      inputLayer.addEventListener('change', function handleChange (event) {
+        layerNumber = parseInt(event.target.value)
+        //store the number of layer in local storage
+        localStorage.setItem("input-layer", layerNumber)
+        window.location.reload()
+      })
+
+
+
 
       //function call
+      setStyle()
       dragWall(controlWall)
-      createBrick(gameWidth / 90)
+      createBrick(layerNumber, gameWidth / 90)
       gameInit()
 
+      //set style based on window size
+      function setStyle () {
+        game.style.width = gameWidth + 'px'
+        game.style.height = window.innerHeight - 50 + 'px'
+
+      }
       //Initialize the game
       function gameInit () {
-        ball.style.top = innerHeight - 150 + 'px'
+        ball.style.top = window.innerHeight - 150 + 'px'
         ball.style.left = gameWidth / 2 + 'px'
         game.onclick = function () {
-          document.onclick = null
+          game.onclick = null
           // speed of ball move horizontal
           let speedX = 2 * speed
           // vertical
           let speedY = -2 * speed
-          console.log(speedX)
-          console.log(speedY)
           setInterval(function () {
 
             // left and top in css used to control the position of ball 
@@ -212,13 +238,13 @@
 
     //create brick
     // n: number of brick
-    function createBrick (n) {
+    function createBrick (layer, n) {
 
 
       let w = 45 * 2, //set width between each brick
         h = 15 * 2 //set height between each brick
 
-      for (let i = 1; i <= n; i++) {  //create n layer of brick
+      for (let i = 1; i <= layer; i++) {  //create n layer of brick
         for (let j = 1; j < n - 1; j++) {    //number of brick in each layer
           let obj = document.createElement("div")
           obj.style.top = i * h + 'px'
@@ -292,13 +318,24 @@
       <option value="1" selected>1.0x</option>
       <option value="2">2.0x</option>
       <option value="3">3.0x</option>
-    </select>
-
-  </div>
-  <div id="gameover">
-    <p>Total: 30 points</p>
-    <span>Ok</span>
-  </div>
+    </select><br /><br />
+    <label for="layer">Number of Layer:</label>
+    <select id="layer">
+      <option value="1" selected>1 layer</option>
+      <option value="2">2 layers</option>
+      <option value="3">3 layers</option>
+      <option value="4">4 layers</option>
+      <option value="5">5 layers</option>
+      <option value="6">6 layers</option>
+      <option value="7">7 layers</option>
+      <option value="8">8 layers</option>
+      <option value="9">9 layers</option>
+      <option value="10">10 layers</option>
+    </select><br /><br />
+    <div id="gameover">
+      <p>Total: 30 points</p>
+      <span>Ok</span>
+    </div>
 
 
 </body>
