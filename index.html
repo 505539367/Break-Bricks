@@ -102,6 +102,7 @@
       let allBricks = brick.getElementsByTagName("div")
       let score = document.getElementById("score")
       let inputSpeed = document.getElementById("speed")
+      console.log(localStorage.getItem("input-speed"))
       inputSpeed.value = localStorage.getItem("input-speed")
       let speed = parseInt(inputSpeed.value)
 
