@@ -108,6 +108,7 @@
       //when user change speed of ball move, reload window
       inputSpeed.addEventListener('change', function handleChange (event) {
         speed = parseInt(event.target.value)
+        //store the speed in local storage
         localStorage.setItem("input-speed", speed)
         window.location.reload()
       })
@@ -115,6 +116,7 @@
       game.style.width = gameWidth + 'px'
       game.style.height = window.innerHeight - 50 + 'px'
 
+      //function call
       dragWall(controlWall)
       createBrick(gameWidth / 90)
       gameInit()
@@ -286,7 +288,7 @@
     <div id="score">SCORE : 0 POINTS </div><br /><br />
     <label for="speed">Speed:</label>
     <select id="speed">
-      <option value="1">1.0x</option>
+      <option value="1" selected>1.0x</option>
       <option value="2">2.0x</option>
       <option value="3">3.0x</option>
     </select>
