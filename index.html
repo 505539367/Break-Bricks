@@ -101,6 +101,16 @@
       let brick = document.getElementById("brick")
       let allBricks = brick.getElementsByTagName("div")
       let score = document.getElementById("score")
+      let inputSpeed = document.getElementById("speed")
+      inputSpeed.value = localStorage.getItem("input-speed")
+      let speed = parseInt(inputSpeed.value)
+
+      //when user change speed of ball move, reload window
+      inputSpeed.addEventListener('change', function handleChange (event) {
+        speed = parseInt(event.target.value)
+        localStorage.setItem("input-speed", speed)
+        window.location.reload()
+      })
 
       game.style.width = gameWidth + 'px'
       game.style.height = window.innerHeight - 50 + 'px'
@@ -109,19 +119,20 @@
       createBrick(gameWidth / 90)
       gameInit()
 
-      // speed of ball move horizontal
-      let speedX = 8
-      // vertical
-      let speedY = -8
-
-
       //Initialize the game
       function gameInit () {
         ball.style.top = innerHeight - 150 + 'px'
         ball.style.left = gameWidth / 2 + 'px'
-        document.onclick = function () {
+        game.onclick = function () {
           document.onclick = null
+          // speed of ball move horizontal
+          let speedX = 2 * speed
+          // vertical
+          let speedY = -2 * speed
+          console.log(speedX)
+          console.log(speedY)
           setInterval(function () {
+
             // left and top in css used to control the position of ball 
             // next position of ball(x,y) = (current x + speedX)px , (current y +speedY)px
             ball.style.left = ball.offsetLeft + speedX + 'px'
@@ -153,14 +164,14 @@
                 speedY *= -1
                 //remove current brick
                 brick.removeChild(allBricks[i])
+                scoreChange()
                 if (allBricks.length === 0) {
                   endGame()
                 }
-                scoreChange()
                 break
               }
             }
-          }, 30)
+          }, 10)
 
         }
       }
@@ -272,11 +283,18 @@
     <div id="brick"> </div>
   </div>
   <div id="setting">
-    <div id="score">SCORE : 0 POINTS </div>
-    <div id="gameover">
-      <p>Total: 30 points</p>
-      <span>Ok</span>
-    </div>
+    <div id="score">SCORE : 0 POINTS </div><br /><br />
+    <label for="speed">Speed:</label>
+    <select id="speed">
+      <option value="1">1.0x</option>
+      <option value="2">2.0x</option>
+      <option value="3">3.0x</option>
+    </select>
+
+  </div>
+  <div id="gameover">
+    <p>Total: 30 points</p>
+    <span>Ok</span>
   </div>
 
 
